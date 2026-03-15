@@ -22,7 +22,7 @@ export function LiveEditor() {
   const variables  = useStore(s => s.variables);
   const theme      = useStore(s => s.theme);
 
-  const frameRef   = useRef<HTMLIFrameElement>(null);
+  const frameRef   = useRef<HTMLIFrameElement>(null!); // React 19: ref passed as prop directly
   const mainRef    = useRef<HTMLDivElement>(null);
   const { run }    = usePreview(frameRef);
 
