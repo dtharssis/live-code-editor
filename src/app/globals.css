@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ────────────────────────────────────────────────────────── */
+:root {
+  --bg:         #171728;
+  --bg2:        #0f0f1e;
+  --surface:    #1e1e2e;
+  --surface2:   #252538;
+  --border:     rgba(255, 255, 255, 0.07);
+  --text:       #cdd6f4;
+  --text2:      #a6adc8;
+  --accent:     #89b4fa;
+  --green:      #a6e3a1;
+  --green-text: #1e1e2e;
+  --tag-h:      #f38ba8;
+  --tag-c:      #89b4fa;
+  --tag-j:      #f9e2af;
+  --tag-l:      #cba6f7;
+  --divbg:      #0f0f1e;
+  --divhover:   #89b4fa;
+}
+
+[data-theme="light"] {
+  --bg:         #f0f0f5;
+  --bg2:        #e0e0ea;
+  --surface:    #ffffff;
+  --surface2:   #eaeaf2;
+  --border:     rgba(0, 0, 0, 0.09);
+  --text:       #2e3440;
+  --text2:      #666666;
+  --accent:     #1565c0;
+  --green:      #2e7d32;
+  --green-text: #ffffff;
+  --tag-h:      #c62828;
+  --tag-c:      #1565c0;
+  --tag-j:      #e65100;
+  --tag-l:      #7b1fa2;
+  --divbg:      #d5d5e0;
+  --divhover:   #1565c0;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── CodeMirror overrides ─────────────────────────────────────────────────── */
+.cm-editor {
+  height: 100% !important;
+}
+
+.cm-scroller {
+  overflow: auto !important;
+}
+
+/* Gutter */
+.cm-gutters {
+  background: #21252b !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="light"] .cm-gutters {
+  background: #f0f0f0 !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── Scrollbar styling ────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25); }
+
+/* ── Hide scrollbar utility ───────────────────────────────────────────────── */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
