@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Prevent iframe from swallowing mouse events during resize drags */
+body.resizing iframe { pointer-events: none; }
+body.resizing { cursor: col-resize; user-select: none; }
+
 /* ── Custom font stack ────────────────────────────────────────────────────── */
 @theme {
   --font-sans: 'Segoe UI', system-ui, sans-serif;

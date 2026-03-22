@@ -92,11 +92,7 @@ export function EditorPanel({ totalWidth, totalHeight, isDark }: EditorPanelProp
                   'max-md:flex-1 max-md:hidden',
                   isCollapsed && 'max-h-[36px]',
                 )}
-                style={
-                  typeof window !== 'undefined' && window.innerWidth > 768
-                    ? { height: isCollapsed ? 36 : height, flexShrink: 0 }
-                    : {}
-                }
+                style={{ height: isCollapsed ? 36 : height, flexShrink: 0 }}
                 data-mob-pane={pane.id}
               >
                 {/* Pane header */}

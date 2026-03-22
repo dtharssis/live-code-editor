@@ -57,7 +57,7 @@ export function PreviewPanel({ ref, onClear }: PreviewPanelProps) {
           ref={ref}
           className="absolute inset-0 w-full h-full border-none"
           title="Preview"
-          sandbox="allow-scripts"
+          sandbox="allow-scripts allow-same-origin"
         />
       </div>
     </div>

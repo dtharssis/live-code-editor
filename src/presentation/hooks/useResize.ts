@@ -31,6 +31,7 @@ export function useResize(totalWidth: number, totalEditorHeight: number) {
     (e: React.MouseEvent) => {
       e.preventDefault();
       vDrag.current = { startX: e.clientX, startW: state.editorWidth };
+      document.body.classList.add('resizing');
     },
     [state.editorWidth],
   );
@@ -82,6 +83,7 @@ export function useResize(totalWidth: number, totalEditorHeight: number) {
     const onUp = () => {
       vDrag.current = null;
       hDrag.current = null;
+      document.body.classList.remove('resizing');
     };
 
     document.addEventListener('mousemove', onMove);
