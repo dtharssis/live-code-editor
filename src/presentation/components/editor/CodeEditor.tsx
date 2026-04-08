@@ -1,17 +1,16 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { EditorView, basicSetup } from 'codemirror';
+import { EditorView, basicSetup }   from 'codemirror';
 import { EditorState, Compartment } from '@codemirror/state';
-import { oneDark }          from '@codemirror/theme-one-dark';
-import { html }             from '@codemirror/lang-html';
-import { css }              from '@codemirror/lang-css';
-import { javascript }       from '@codemirror/lang-javascript';
-import { StreamLanguage }   from '@codemirror/language';
-import { jinja2 }           from '@codemirror/legacy-modes/mode/jinja2';
-import { PaneId }           from '../../../domain/value-objects/types';
+import { oneDark }                  from '@codemirror/theme-one-dark';
+import { html }                     from '@codemirror/lang-html';
+import { css }                      from '@codemirror/lang-css';
+import { javascript }               from '@codemirror/lang-javascript';
+import { StreamLanguage }           from '@codemirror/language';
+import { jinja2 }                   from '@codemirror/legacy-modes/mode/jinja2';
 
-type Lang = PaneId | 'liquid-markup';
+type Lang = 'markup' | 'liquid-markup' | 'css' | 'js';
 
 function getLangExtension(lang: Lang) {
   switch (lang) {
@@ -23,8 +22,9 @@ function getLangExtension(lang: Lang) {
 }
 
 const fixedTheme = EditorView.theme({
-  '&': { height: '100%', fontSize: '13px' },
-  '.cm-scroller': { fontFamily: "'Fira Code', 'JetBrains Mono', monospace", lineHeight: '1.65', overflow: 'auto' },
+  '&':            { height: '100%', fontSize: '13px' },
+  '.cm-scroller': { fontFamily: "'Fira Code', 'JetBrains Mono', monospace", lineHeight: '1.65', overflowY: 'auto', overflowX: 'hidden' },
+  '.cm-content':  { whiteSpace: 'pre-wrap', wordBreak: 'break-word' },
 });
 
 interface CodeEditorProps {
@@ -42,7 +42,7 @@ export function CodeEditor({ lang, value, onChange, isDark }: CodeEditorProps) {
   const onChangeRef   = useRef(onChange);
   onChangeRef.current = onChange;
 
-  // ── Mount editor ──────────────────────────────────────────────────────────
+  // ── Mount ────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -52,6 +52,7 @@ export function CodeEditor({ lang, value, onChange, isDark }: CodeEditorProps) {
         extensions: [
           basicSetup,
           fixedTheme,
+          EditorView.lineWrapping,
           langCompart.current.of(getLangExtension(lang)),
           themeCompart.current.of(isDark ? oneDark : []),
           EditorView.updateListener.of(update => {

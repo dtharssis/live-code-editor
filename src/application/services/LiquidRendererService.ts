@@ -6,22 +6,29 @@ export class LiquidRendererService {
   render(template: string, vars: Record<string, string>): string {
     let out = template;
 
-    // Strip comments
+    // Strip {% schema %}...{% endschema %} blocks (must happen first — before tag stripper)
+    out = out.replace(
+      /\{%-?\s*schema\s*-?%\}[\s\S]*?\{%-?\s*endschema\s*-?%\}/g,
+      '',
+    );
+
+    // Strip {% comment %}...{% endcomment %}
     out = out.replace(
       /\{%-?\s*comment\s*-?%\}[\s\S]*?\{%-?\s*endcomment\s*-?%\}/g,
       '',
     );
 
     // {% if key != blank %} … {% else %} … {% endif %}
+    // Supports dot-notation: section.settings.foo, block.settings.bar
     out = out.replace(
-      /\{%-?\s*if\s+(\w+)\s*!=\s*blank\s*-?%\}([\s\S]*?)(?:\{%-?\s*else\s*-?%\}([\s\S]*?))?\{%-?\s*endif\s*-?%\}/g,
+      /\{%-?\s*if\s+([\w.]+)\s*!=\s*blank\s*-?%\}([\s\S]*?)(?:\{%-?\s*else\s*-?%\}([\s\S]*?))?\{%-?\s*endif\s*-?%\}/g,
       (_, k: string, ifBlock: string, elseBlock = '') =>
         vars[k] && vars[k] !== '' ? ifBlock : elseBlock,
     );
 
     // {% if key %} … {% else %} … {% endif %}
     out = out.replace(
-      /\{%-?\s*if\s+(\w+)\s*-?%\}([\s\S]*?)(?:\{%-?\s*else\s*-?%\}([\s\S]*?))?\{%-?\s*endif\s*-?%\}/g,
+      /\{%-?\s*if\s+([\w.]+)\s*-?%\}([\s\S]*?)(?:\{%-?\s*else\s*-?%\}([\s\S]*?))?\{%-?\s*endif\s*-?%\}/g,
       (_, k: string, ifBlock: string, elseBlock = '') => {
         const val = vars[k];
         const truthy = val && val !== 'false' && val !== '0';
@@ -29,13 +36,13 @@ export class LiquidRendererService {
       },
     );
 
-    // {{ variable }}
+    // {{ variable }} — supports dot-notation (section.settings.heading, etc.)
     out = out.replace(
-      /\{\{-?\s*([\w.]+)\s*-?\}\}/g,
+      /\{\{-?\s*([\w.]+)(?:\s*\|[^}]*)?\s*-?\}\}/g,
       (_, key: string) => {
         const k = key.trim();
         if (vars[k] !== undefined) return vars[k];
-        return `<mark style="background:rgba(203,166,247,.25);color:#cba6f7;border-radius:3px;padding:0 3px;font-size:11px">{{ ${k} }}</mark>`;
+        return '';
       },
     );
 
