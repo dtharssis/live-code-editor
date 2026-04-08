@@ -1,8 +1,7 @@
 import { ConsoleEntry } from '../../domain/entities/ConsoleEntry';
-import { EditorMode } from '../../domain/value-objects/types';
 
 /**
- * Application service: static analysis / linting for HTML, CSS, JS and Liquid.
+ * Application service: static analysis / linting for CSS, JS and Liquid.
  * Returns a list of console entries with errors and warnings.
  */
 export class CodeAnalyzerService {
@@ -10,7 +9,7 @@ export class CodeAnalyzerService {
     markup: string,
     css:    string,
     js:     string,
-    mode:   EditorMode,
+    mode:   'liquid' = 'liquid',
   ): ConsoleEntry[] {
     const issues: ConsoleEntry[] = [];
     let seq = 0;
@@ -47,30 +46,6 @@ export class CodeAnalyzerService {
     const cbC = (css.match(/\}/g) ?? []).length;
     if (cbO > cbC) add('err', `Missing } — ${cbO} open, ${cbC} closed`, 'CSS');
     if (cbC > cbO) add('err', `Extra } — ${cbC} closed, ${cbO} open`, 'CSS');
-
-    // ── HTML tag balance ────────────────────────────────────────────────────
-    if (mode === 'html') {
-      const VOID: Record<string, boolean> = {
-        area:1,base:1,br:1,col:1,embed:1,hr:1,img:1,input:1,
-        link:1,meta:1,param:1,source:1,track:1,wbr:1,
-      } as unknown as Record<string, boolean>;
-
-      const stack: string[] = [];
-      const re = /<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*>/g;
-      let m: RegExpExecArray | null;
-
-      while ((m = re.exec(markup)) !== null) {
-        const tag = m[1].toLowerCase();
-        if (VOID[tag]) continue;
-        if (m[0].charAt(1) === '/') {
-          if (stack.length && stack[stack.length - 1] === tag) stack.pop();
-          else add('err', `Unexpected closing tag </${tag}>`, 'HTML');
-        } else if (!m[0].endsWith('/>')) {
-          stack.push(tag);
-        }
-      }
-      stack.forEach(t => add('err', `Unclosed tag <${t}>`, 'HTML'));
-    }
 
     // ── Liquid block balance ────────────────────────────────────────────────
     if (mode === 'liquid') {

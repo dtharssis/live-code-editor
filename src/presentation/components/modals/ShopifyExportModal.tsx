@@ -16,18 +16,22 @@ function slugify(s: string) {
 export function ShopifyExportModal() {
   const activeModal = useStore(s => s.activeModal);
   const closeModal  = useStore(s => s.closeModal);
-  const projects    = useStore(s => s.projects);
+  const files       = useStore(s => s.files);
   const variables   = useStore(s => s.variables);
+
+  const markup = Object.entries(files).filter(([n]) => n.endsWith('.liquid')).map(([,c]) => c).join('\n');
+  const css    = Object.entries(files).filter(([n]) => n.endsWith('.css')).map(([,c]) => c).join('\n');
+  const js     = Object.entries(files).filter(([n]) => n.endsWith('.js')).map(([,c]) => c).join('\n');
 
   const [raw, setRaw] = useState('');
   const slug = slugify(raw);
   const name = `livecode-${slug}`;
-  const hasJs = projects.liquid.js.trim().length > 0;
+  const hasJs = js.trim().length > 0;
 
   useEffect(() => { if (activeModal === 'shopify-export') setRaw(''); }, [activeModal]);
 
   const confirm = async () => {
-    await useCase.execute(name, projects.liquid.markup, projects.liquid.css, projects.liquid.js, variables);
+    await useCase.execute(name, markup, css, js, variables);
     closeModal();
   };
 

@@ -10,37 +10,23 @@ interface PreviewPanelProps {
 
 // React 19: ref is a regular prop — forwardRef is no longer needed
 export function PreviewPanel({ ref, onClear }: PreviewPanelProps) {
-  const mode      = useStore(s => s.mode);
   const mobileTab = useStore(s => s.mobileTab);
-  const isLiquid  = mode === 'liquid';
 
   return (
     <div
       className={cn(
         'flex flex-col overflow-hidden min-w-[160px] flex-1',
         'max-md:hidden',
-        mobileTab === 'preview' && 'max-md:flex',
+        mobileTab === 'preview' && 'max-md:flex max-md:flex-1',
       )}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-[5px] bg-[var(--surface2)] border-b border-[var(--border)] flex-shrink-0">
         <div className="flex items-center gap-[6px] text-[12px] text-[var(--text2)]">
-          <span
-            className={cn(
-              'w-[7px] h-[7px] rounded-full animate-pulse',
-              isLiquid ? 'bg-[var(--tag-l)]' : 'bg-[var(--green)]',
-            )}
-          />
+          <span className="w-[7px] h-[7px] rounded-full animate-pulse bg-[var(--tag-l)]" />
           <span>Preview</span>
-          <span
-            className={cn(
-              'text-[10px] px-2 py-[1px] rounded-full',
-              isLiquid
-                ? 'bg-[rgba(203,166,247,0.15)] text-[var(--tag-l)]'
-                : 'bg-[rgba(163,230,160,0.15)] text-[var(--green)]',
-            )}
-          >
-            {isLiquid ? 'Liquid' : 'HTML'}
+          <span className="text-[10px] px-2 py-[1px] rounded-full bg-[rgba(203,166,247,0.15)] text-[var(--tag-l)]">
+            Liquid
           </span>
         </div>
         <button

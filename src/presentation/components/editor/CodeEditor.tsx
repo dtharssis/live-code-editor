@@ -9,9 +9,7 @@ import { css }              from '@codemirror/lang-css';
 import { javascript }       from '@codemirror/lang-javascript';
 import { StreamLanguage }   from '@codemirror/language';
 import { jinja2 }           from '@codemirror/legacy-modes/mode/jinja2';
-import { PaneId }           from '../../../domain/value-objects/types';
-
-type Lang = PaneId | 'liquid-markup';
+type Lang = 'markup' | 'liquid-markup' | 'css' | 'js';
 
 function getLangExtension(lang: Lang) {
   switch (lang) {
@@ -24,7 +22,8 @@ function getLangExtension(lang: Lang) {
 
 const fixedTheme = EditorView.theme({
   '&': { height: '100%', fontSize: '13px' },
-  '.cm-scroller': { fontFamily: "'Fira Code', 'JetBrains Mono', monospace", lineHeight: '1.65', overflow: 'auto' },
+  '.cm-scroller': { fontFamily: "'Fira Code', 'JetBrains Mono', monospace", lineHeight: '1.65', overflowY: 'auto', overflowX: 'hidden' },
+  '.cm-content': { whiteSpace: 'pre-wrap', wordBreak: 'break-word' },
 });
 
 interface CodeEditorProps {
@@ -52,6 +51,7 @@ export function CodeEditor({ lang, value, onChange, isDark }: CodeEditorProps) {
         extensions: [
           basicSetup,
           fixedTheme,
+          EditorView.lineWrapping,
           langCompart.current.of(getLangExtension(lang)),
           themeCompart.current.of(isDark ? oneDark : []),
           EditorView.updateListener.of(update => {

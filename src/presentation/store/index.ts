@@ -1,46 +1,44 @@
 import { create } from 'zustand';
-import { EditorMode, ThemeMode, PaneId, MobileTab, ModalType } from '../../domain/value-objects/types';
-import { ProjectMap } from '../../domain/entities/Project';
+import { ThemeMode, MobileTab, ModalType, VariableType } from '../../domain/value-objects/types';
 import { VariableStore } from '../../domain/entities/Variable';
 import { ConsoleEntry } from '../../domain/entities/ConsoleEntry';
-import { DEFAULT_PROJECTS, DEFAULT_VARIABLES } from '../constants/defaultProjects';
+import { DEFAULT_FILES, DEFAULT_ACTIVE_FILE, DEFAULT_VARIABLES } from '../constants/defaultProjects';
 
 // ─── Editor slice ────────────────────────────────────────────────────────────
 
 interface EditorState {
-  mode:      EditorMode;
-  projects:  ProjectMap;
-  variables: VariableStore;
-  autoRun:   boolean;
+  files:      Record<string, string>;
+  activeFile: string;
+  variables:  VariableStore;
+  autoRun:    boolean;
 
-  setMode:         (mode: EditorMode)          => void;
-  updateCode:      (pane: PaneId, value: string) => void;
-  setVariable:     (key: string, value: string)  => void;
-  addVariable:     (key: string, type: import('../../domain/value-objects/types').VariableType) => void;
-  deleteVariable:  (key: string)               => void;
-  toggleVariableType: (key: string)            => void;
-  setAutoRun:      (value: boolean)            => void;
+  setActiveFile:     (file: string) => void;
+  updateFileContent: (file: string, content: string) => void;
+  resetFiles:        () => void;
+  setVariable:        (key: string, value: string) => void;
+  addVariable:        (key: string, type: VariableType) => void;
+  deleteVariable:     (key: string) => void;
+  toggleVariableType: (key: string) => void;
+  setAutoRun:         (value: boolean) => void;
 }
 
 // ─── UI slice ────────────────────────────────────────────────────────────────
 
 interface UIState {
-  theme:        ThemeMode;
-  consoleOpen:  boolean;
-  expandedPane: PaneId | null;
-  activeModal:  ModalType | null;
-  mobileTab:    MobileTab;
+  theme:          ThemeMode;
+  consoleOpen:    boolean;
+  activeModal:    ModalType | null;
+  mobileTab:      MobileTab;
   consoleEntries: ConsoleEntry[];
-  errorCount:   number;
+  errorCount:     number;
 
-  cycleTheme:        ()               => void;
-  toggleConsole:     ()               => void;
-  setExpandedPane:   (p: PaneId | null) => void;
-  openModal:         (m: ModalType)   => void;
-  closeModal:        ()               => void;
-  setMobileTab:      (t: MobileTab)   => void;
-  addConsoleEntry:   (e: ConsoleEntry) => void;
-  clearConsole:      ()               => void;
+  cycleTheme:      ()                => void;
+  toggleConsole:   ()                => void;
+  openModal:       (m: ModalType)    => void;
+  closeModal:      ()                => void;
+  setMobileTab:    (t: MobileTab)    => void;
+  addConsoleEntry: (e: ConsoleEntry) => void;
+  clearConsole:    ()                => void;
 }
 
 // ─── Combined store ──────────────────────────────────────────────────────────
@@ -51,24 +49,21 @@ const THEMES: ThemeMode[] = ['auto', 'dark', 'light'];
 
 export const useStore = create<Store>((set, get) => ({
   // ── Editor ─────────────────────────────────────────────────────────────────
-  mode:      'html',
-  projects:  DEFAULT_PROJECTS,
-  variables: DEFAULT_VARIABLES,
-  autoRun:   true,
+  files:      DEFAULT_FILES,
+  activeFile: DEFAULT_ACTIVE_FILE,
+  variables:  DEFAULT_VARIABLES,
+  autoRun:    true,
 
-  setMode: (mode) => {
-    set({ mode });
+  setActiveFile: (file) => set({ activeFile: file }),
+
+  updateFileContent: (file, content) => {
+    set(s => ({ files: { ...s.files, [file]: content } }));
   },
 
-  updateCode: (pane, value) => {
-    const { mode, projects } = get();
-    set({
-      projects: {
-        ...projects,
-        [mode]: { ...projects[mode], [pane]: value },
-      },
-    });
-  },
+  resetFiles: () => set({
+    files:      { 'dynamic-hero.liquid': '', 'theme.css': '', 'theme.js': '' },
+    activeFile: 'dynamic-hero.liquid',
+  }),
 
   setVariable: (key, value) => {
     set(s => ({
@@ -115,9 +110,8 @@ export const useStore = create<Store>((set, get) => ({
   // ── UI ─────────────────────────────────────────────────────────────────────
   theme:          'auto',
   consoleOpen:    false,
-  expandedPane:   null,
   activeModal:    null,
-  mobileTab:      'markup',
+  mobileTab:      'editor',
   consoleEntries: [],
   errorCount:     0,
 
@@ -128,8 +122,6 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   toggleConsole: () => set(s => ({ consoleOpen: !s.consoleOpen })),
-
-  setExpandedPane: (p) => set({ expandedPane: p }),
 
   openModal:  (m) => set({ activeModal: m }),
   closeModal: ()  => set({ activeModal: null }),

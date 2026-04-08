@@ -10,17 +10,29 @@ const liquidRenderer = new LiquidRendererService();
 const codeAnalyzer   = new CodeAnalyzerService();
 
 export function usePreview(frameRef: React.RefObject<HTMLIFrameElement>) {
-  const store = useStore();
   const seqRef = useRef(0);
 
   const run = useCallback(() => {
-    const { mode, projects, variables, clearConsole, addConsoleEntry } = useStore.getState();
-    const { markup, css, js } = projects[mode];
+    const { files, variables, clearConsole, addConsoleEntry } = useStore.getState();
+
+    // Combine all files by type — preview is always the full result
+    const markup = Object.entries(files)
+      .filter(([name]) => name.endsWith('.liquid'))
+      .map(([, content]) => content)
+      .join('\n');
+    const css = Object.entries(files)
+      .filter(([name]) => name.endsWith('.css'))
+      .map(([, content]) => content)
+      .join('\n');
+    const js = Object.entries(files)
+      .filter(([name]) => name.endsWith('.js'))
+      .map(([, content]) => content)
+      .join('\n');
 
     clearConsole();
 
     // Static analysis
-    const issues = codeAnalyzer.analyze(markup, css, js, mode);
+    const issues = codeAnalyzer.analyze(markup, css, js, 'liquid');
     if (issues.length === 0) {
       addConsoleEntry({
         id:        `${Date.now()}-${seqRef.current++}`,
@@ -32,10 +44,8 @@ export function usePreview(frameRef: React.RefObject<HTMLIFrameElement>) {
       issues.forEach(addConsoleEntry);
     }
 
-    // Render markup
-    const html = mode === 'liquid'
-      ? liquidRenderer.render(markup, variables.values)
-      : markup;
+    // Render Liquid markup
+    const html = liquidRenderer.render(markup, variables.values);
 
     const isMobile = window.innerWidth <= 768;
     const mobileReset = isMobile
@@ -53,7 +63,6 @@ export function usePreview(frameRef: React.RefObject<HTMLIFrameElement>) {
     const fdoc = frame.contentDocument ?? frame.contentWindow?.document;
     if (!fdoc) return;
 
-    // Runtime error relay
     frame.contentWindow!.onerror = (msg, _src, line) => {
       addConsoleEntry({
         id:        `${Date.now()}-${seqRef.current++}`,
